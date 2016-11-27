@@ -41,30 +41,48 @@ function positionFromId(id) {
   return position;
 }
 
-function printToCardinals(id, ctxt) {
-  var offsets = { N: -1, S: 1, E: 10, W: -10 };
-  function lucky() {
-    var luckyNumber = 10;
-    var chance = utils.getRandomIntInclusive(1,luckyNumber);
-    if (chance === luckyNumber) {
-      console.log("how lucky!");
-      return emoji["fourLeaf"];
-    } else {
-      return emoji["shamrock"];
-    }
+function lucky() {
+  var luckyNumber = 10;
+  var chance = utils.getRandomIntInclusive(1, luckyNumber);
+  if (chance === luckyNumber) {
+    console.log("how lucky!");
+    return emoji["fourLeaf"];
+  } else {
+    return emoji["shamrock"];
   }
+}
+var offsets = { N: -1, S: 1, E: 10, W: -10 };
+function printToCardinals(id, ctxt) {
+  applyToNorth(id, printTo(lucky, ctxt));
+  applyToSouth(id, printTo(lucky, ctxt));
+  applyToEast(id, printTo(lucky, ctxt));
+  applyToWest(id, printTo(lucky, ctxt));
+}
 
-  var [c,d] = positionFromId(id + offsets['N']);
-  ctxt.fillText(lucky(), c+3, d+24);
+function printTo(objFunc, ctxt) {
+  function f(x, y) {
+    var xOffset = 3;
+    var yOffset = 24;
+    ctxt.fillText(objFunc.call(), x + xOffset, y + yOffset);
+  }
+  return f;
+}
 
-  var [a,b] = positionFromId(id + offsets['S']);
-  ctxt.fillText(lucky(), a+3, b+24);
-
-  var [e,f] = positionFromId(id + offsets['E']);
-  ctxt.fillText(lucky(), e+3, f+24);
-
-  var [g,h] = positionFromId(id + offsets['W']);
-  ctxt.fillText(lucky(), g+3, h+24);
+function applyToNorth(id, nFunc) {
+  var [c, d] = positionFromId(id + offsets['N']);
+  nFunc.apply(null, [c, d]);
+}
+function applyToSouth(id, sFunc) {
+  var [a, b] = positionFromId(id + offsets['S']);
+  sFunc.apply(null, [a, b]);
+}
+function applyToEast(id, eFunc) {
+  var [e, f] = positionFromId(id + offsets['E']);
+  eFunc.apply(null, [e, f]);
+}
+function applyToWest(id, wFunc) {
+  var [g, h] = positionFromId(id + offsets['W']);
+  wFunc.apply(null, [g, h]);
 }
 
 var currentGridState = Array.from(new Array(100), () => []);
@@ -97,6 +115,18 @@ function populateGrid(context) {
 
     currentGridState[activeId].push(positionFromId(activeId));
   }
+}
+
+function lifeStep(grid, newGrid) {
+  function calculateCell(cell) {
+    //If a dead cell has exactly three live neighbours, it comes to life
+    //If a live cell has less than two live neighbours, it dies
+    //If a live cell has more than three live neighbours, it dies
+    //If a live cell has two or three live neighbours, it continues living
+    return cell;
+  }
+  newGrid = grid.map(calculateCell);
+  return newGrid;
 }
 
 module.exports = (function() {
