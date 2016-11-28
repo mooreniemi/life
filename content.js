@@ -44,7 +44,6 @@ function lucky() {
   var luckyNumber = 10;
   var chance = utils.getRandomIntInclusive(1, luckyNumber);
   if (chance === luckyNumber) {
-    console.log("how lucky!");
     return emoji["fourLeaf"];
   } else {
     return emoji["shamrock"];
@@ -137,7 +136,7 @@ function lifeStep(grid) {
     var neighbors = getNeighbors(i);
     var neighborhoodLiveness = neighbors.map(function(e) { return isLive(grid[e]); });
     var livenessCount = neighborhoodLiveness.filter(function(e) { return e; }).length;
-    if(livenessCount < 3) { livenessCount = 4; };
+    if(livenessCount > 3) { livenessCount = 4; };
 
     var nextState;
     if(alive) {
@@ -155,7 +154,7 @@ function lifeStep(grid) {
     if(nextState === 'live') {
       cell.push(positionFromId(i));
     } else {
-      cell = [];
+      cell.length = 0;
     }
     return cell;
   }
@@ -176,7 +175,7 @@ module.exports = (function() {
     canvas.addEventListener('click', function() {
       var newGridState = lifeStep(currentGridState);
       currentGridState = newGridState;
-      drawGrid(canvas, context);
+      drawGrid(canvas, context); // clear
 
       currentGridState.forEach(function(e,i) {
         if(typeof(e[0]) === 'undefined') {
@@ -184,6 +183,12 @@ module.exports = (function() {
         } else {
           var [x,y] = e[0];
         }
+
+        // grey out previous state
+        context.fillStyle = "rgba(137,96,62,0.9)";
+        context.fillRect(x-4, y-4, 40, 40);
+        context.fillStyle = "rgba(255, 255, 255, 1.0)";
+
         switch(e.length) {
         case 0:
           context.fillStyle = "#5FB661";
@@ -191,14 +196,12 @@ module.exports = (function() {
           break;
         case 1:
           context.font = "24px Arial";
-          context.fillText(emoji['shamrock'], x+3, y+24);
+          context.fillText(emoji['tiger'], x+3, y+24);
           break;
         default:
-          context.fillStyle = "rgba(137,96,62,0.6)";
-          context.fillRect(x-4, y-4, 40, 40);
-          context.fillStyle = "rgba(255, 255, 255, 1.0)";
-
           context.font = "24px Arial";
+          context.fillStyle = "#5FB661";
+          context.fillRect(x-4, y-4, 40, 40);
           printToCardinals(i, context);
           break;
         }
