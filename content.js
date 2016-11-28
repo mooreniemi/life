@@ -159,7 +159,6 @@ function lifeStep(grid) {
     var nextPossibleState = [nextDeadState, nextLivingState];
 
     var nextState = nextPossibleState[isLive(grid, i)][numberOfLiveNeighbors];
-
     if (nextState === 'live') {
       cell.push(positionFromId(i));
     } else {
