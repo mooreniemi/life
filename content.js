@@ -32,7 +32,7 @@ var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
 function positionFromId(id) {
   var margin = 15;
   if(typeof(gridAsArray[id]) === 'undefined') {
-    console.log(`off canvas position for id: ${id}`);
+    console.log(`ya fucked up: off canvas position for id: ${id}`);
   }
   var [x, y] = gridAsArray[id];
   var position = [(x * size) + margin, (y * size) + margin];
@@ -115,8 +115,7 @@ function gPrint(context, e, i) {
 }
 
 function populateGrid(context) {
-  var turns = 100;
-  for(var i=1; i <= turns; i += 1) {
+  for(var i=1; i <= 100; i += 1) {
     var activeId = utils.getRandomIntInclusive(0, 99);
     gPrint(context, currentGridState[activeId], activeId);
     currentGridState[activeId].push(positionFromId(activeId));
