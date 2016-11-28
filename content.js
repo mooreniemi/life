@@ -93,24 +93,24 @@ function getNeighbors(id) {
 
 var currentGridState = Array.from(new Array(100), () => []);
 
-function gPrint(context, activeId) {
-  var [x,y] = positionFromId(activeId);
-  switch(currentGridState[activeId].length) {
+function gPrint(context, e, i) {
+  var [x,y] = positionFromId(i);
+  switch(e.length) {
   case 0:
-    context.fillStyle = "#5FB661";
-    context.fillRect(x-4, y-4, 40, 40);
+    context.fillStyle = "rgba(137,96,62,0.9)";
+    context.fillRect(x-4, y-4, 38, 38);
+    context.fillStyle = "rgba(255, 255, 255, 1.0)";
     break;
   case 1:
     context.font = "24px Arial";
-    context.fillText(emoji['shamrock'], x+3, y+24);
+    context.fillText(emoji['tiger'], x+3, y+24);
     break;
   default:
-    context.fillStyle = "rgba(137,96,62,0.6)";
+    context.fillStyle = "#5FB661";
     context.fillRect(x-4, y-4, 40, 40);
-    context.fillStyle = "rgba(255, 255, 255, 1.0)";
 
     context.font = "24px Arial";
-    printToCardinals(activeId, context);
+    printToCardinals(i, context);
     break;
   }
 }
@@ -119,7 +119,7 @@ function populateGrid(context) {
   var turns = 100;
   for(var i=1; i <= turns; i += 1) {
     var activeId = utils.getRandomIntInclusive(0, 99);
-    gPrint(context, activeId);
+    gPrint(context, currentGridState[activeId], activeId);
     currentGridState[activeId].push(positionFromId(activeId));
   }
 }
@@ -178,34 +178,10 @@ module.exports = (function() {
       currentGridState = newGridState;
       drawGrid(canvas, context); // clear
 
-      currentGridState.forEach(function(e,i) {
-        if(typeof(e[0]) === 'undefined') {
-          var [x,y] = [-100,-100];
-        } else {
-          var [x,y] = e[0];
-        }
-
-        // grey out previous state
-        context.fillStyle = "rgba(137,96,62,0.9)";
-        context.fillRect(x-4, y-4, 40, 40);
-
-        switch(e.length) {
-        case 0:
-          context.fillStyle = "#5FB661";
-          context.fillRect(x-4, y-4, 40, 40);
-          break;
-        case 1:
-          context.font = "24px Arial";
-          context.fillText(emoji['tiger'], x+3, y+24);
-          break;
-        default:
-          context.font = "24px Arial";
-          context.fillStyle = "#5FB661";
-          context.fillRect(x-4, y-4, 40, 40);
-          printToCardinals(i, context);
-          break;
-        }
-      });
+      function gPrintWithContext(context) {
+        return function(e,i) { gPrint(context, e, i); };
+      }
+      currentGridState.forEach(gPrintWithContext(context));
     }, false);
   });
 })();

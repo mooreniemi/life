@@ -1,2 +1,2 @@
 # life
-conway's GOL
+kinda sorta conway's game of life
