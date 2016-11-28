@@ -26,7 +26,6 @@ function drawGrid(canvas, context) {
   context.stroke();
 }
 
-
 var zeroToNine = [...Array(10).keys()];
 var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
 
@@ -85,8 +84,15 @@ function applyToWest(id, wFunc) {
   wFunc.apply(null, [g, h]);
 }
 
+function getNeighbors(id) {
+  var n = id - 1,
+      s = id + 1,
+      e = id + 10,
+      w = id - 10;
+  return [n, s, e, w];
+}
+
 var currentGridState = Array.from(new Array(100), () => []);
-var updatedGridState = Array.from(new Array(100), () => []);
 
 function populateGrid(context) {
   var turns = 100;
@@ -117,16 +123,44 @@ function populateGrid(context) {
   }
 }
 
-function lifeStep(grid, newGrid) {
-  function calculateCell(cell) {
-    //If a dead cell has exactly three live neighbours, it comes to life
-    //If a live cell has less than two live neighbours, it dies
-    //If a live cell has more than three live neighbours, it dies
-    //If a live cell has two or three live neighbours, it continues living
+function lifeStep(grid) {
+  function calculateCell(cell,i) {
+    function isLive(a) {
+      if(typeof(a) === 'undefined') {
+        return false;
+      } else {
+        return a.length > 0;
+      }
+    }
+
+    var alive = isLive(cell);
+    var neighbors = getNeighbors(i);
+    var neighborhoodLiveness = neighbors.map(function(e) { return isLive(grid[e]); });
+    var livenessCount = neighborhoodLiveness.filter(function(e) { return e; }).length;
+    if(livenessCount < 3) { livenessCount = 4; };
+
+    var nextState;
+    if(alive) {
+      var nextLivingState = ['dead','dead','live','live','dead'];
+      //If a live cell has less than two live neighbours, it dies
+      //If a live cell has more than three live neighbours, it dies
+      //If a live cell has two or three live neighbours, it continues living
+      nextState = nextLivingState[livenessCount];
+    } else {
+      var nextDeadState = ['dead','dead','dead','live','dead'];
+      //If a dead cell has exactly three live neighbours, it comes to life
+      nextState = nextDeadState[livenessCount];
+    }
+
+    if(nextState === 'live') {
+      cell.push(positionFromId(i));
+    } else {
+      cell = [];
+    }
     return cell;
   }
-  newGrid = grid.map(calculateCell);
-  return newGrid;
+
+  return grid.map(calculateCell);
 }
 
 module.exports = (function() {
@@ -138,5 +172,37 @@ module.exports = (function() {
 
     drawGrid(canvas, context);
     populateGrid(context);
+
+    canvas.addEventListener('click', function() {
+      var newGridState = lifeStep(currentGridState);
+      currentGridState = newGridState;
+      drawGrid(canvas, context);
+
+      currentGridState.forEach(function(e,i) {
+        if(typeof(e[0]) === 'undefined') {
+          var [x,y] = [-100,-100];
+        } else {
+          var [x,y] = e[0];
+        }
+        switch(e.length) {
+        case 0:
+          context.fillStyle = "#5FB661";
+          context.fillRect(x-4, y-4, 40, 40);
+          break;
+        case 1:
+          context.font = "24px Arial";
+          context.fillText(emoji['shamrock'], x+3, y+24);
+          break;
+        default:
+          context.fillStyle = "rgba(137,96,62,0.6)";
+          context.fillRect(x-4, y-4, 40, 40);
+          context.fillStyle = "rgba(255, 255, 255, 1.0)";
+
+          context.font = "24px Arial";
+          printToCardinals(i, context);
+          break;
+        }
+      });
+    }, false);
   });
 })();

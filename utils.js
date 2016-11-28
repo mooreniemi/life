@@ -21,4 +21,8 @@ function cartesianProductOf() {
   }, [[]]);
 }
 
-module.exports = { getRandomIntInclusive, cartesianProductOf };
+function identity(a) {
+  return a;
+}
+
+module.exports = { getRandomIntInclusive, cartesianProductOf, identity };
