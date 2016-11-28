@@ -9,6 +9,7 @@ var emoji = {
   westMoon: "\uD83C\uDF1C",
   shamrock: "\u2618",
   fourLeaf: "\uD83C\uDF40",
+  rain: "\u26C8",
 };
 
 module.exports = emoji;

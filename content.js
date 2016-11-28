@@ -107,19 +107,24 @@ var currentGridState = Array.from(new Array(100), () => []);
 
 function gPrint(context, e, i) {
   var [x, y] = positionFromId(i);
+
+  // grey out previous
+  context.fillStyle = "rgba(137,96,62,0.9)";
+  context.fillRect(x - 4, y - 4, 38, 38);
+
   switch (e.length) {
   case 0:
-    context.fillStyle = "rgba(137,96,62,0.9)";
+    context.fillStyle = "#89603e";
     context.fillRect(x - 4, y - 4, 38, 38);
-    context.fillStyle = "rgba(255, 255, 255, 1.0)";
     break;
   case 1:
-    context.fillText(emoji['tiger'], x + 3, y + 24);
+    context.fillStyle = "#5FB661";
+    context.fillRect(x - 4, y - 4, 40, 40);
+    context.fillText(emoji['rain'], x + 3, y + 24);
     break;
   default:
     context.fillStyle = "#5FB661";
     context.fillRect(x - 4, y - 4, 40, 40);
-
     printToCardinals(i, context);
     break;
   }
