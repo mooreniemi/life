@@ -132,9 +132,8 @@ function lifeStep(grid) {
       }
     }
 
-    var neighbors = getNeighbors(i);
-    var neighborhoodLiveness = neighbors.map(function(e) { return isLive(grid[e]); });
-    var livenessCount = neighborhoodLiveness.filter(utils.identity).length.clamp(0, 4);
+    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid[e]); });
+    var numberOfLiveNeighbors = neighborhood.filter(utils.identity).length.clamp(0, 4);
 
     var nextState;
     if(isLive(cell)) {
@@ -143,11 +142,11 @@ function lifeStep(grid) {
       //If a live cell has less than two live neighbours, it dies
       //If a live cell has more than three live neighbours, it dies
       //If a live cell has two or three live neighbours, it continues living
-      nextState = nextLivingState[livenessCount];
+      nextState = nextLivingState[numberOfLiveNeighbors];
     } else {
       var nextDeadState = ['dead', 'dead', 'dead', 'live', 'dead'];
       //If a dead cell has exactly three live neighbours, it comes to life
-      nextState = nextDeadState[livenessCount];
+      nextState = nextDeadState[numberOfLiveNeighbors];
     }
 
     if(nextState === 'live') {
