@@ -84,10 +84,14 @@ function applyToWest(id, wFunc) {
 
 function getNeighbors(id) {
   var n = id - 1,
+      ne = id - 1 + 10,
+      nw = id - 1 - 10,
       s = id + 1,
+      se = id + 1 + 10,
+      sw = id + 1 - 10,
       e = id + 10,
       w = id - 10;
-  return [n, s, e, w];
+  return [n, ne, nw, s, se, sw, e, w];
 }
 
 var currentGridState = Array.from(new Array(100), () => []);
@@ -162,8 +166,6 @@ function lifeStep(grid) {
 
 module.exports = (function() {
   document.addEventListener("DOMContentLoaded", function(event) {
-    console.log('dom loaded.');
-
     var canvas = document.querySelector("canvas");
     var context = canvas.getContext("2d");
 
