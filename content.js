@@ -105,14 +105,12 @@ function gPrint(context, e, i) {
     context.fillStyle = "rgba(255, 255, 255, 1.0)";
     break;
   case 1:
-    context.font = "24px Arial";
     context.fillText(emoji['tiger'], x+3, y+24);
     break;
   default:
     context.fillStyle = "#5FB661";
     context.fillRect(x-4, y-4, 40, 40);
 
-    context.font = "24px Arial";
     printToCardinals(i, context);
     break;
   }
@@ -132,7 +130,7 @@ function lifeStep(grid) {
       return grid[a.mod(99)].length > 0;
     }
 
-    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid,e); });
+    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid, e); });
     var numberOfLiveNeighbors = neighborhood.filter(utils.identity).length.clamp(0, 4);
 
     var nextState;
@@ -164,6 +162,7 @@ module.exports = (function() {
   document.addEventListener("DOMContentLoaded", function(event) {
     var canvas = document.querySelector("canvas");
     var context = canvas.getContext("2d");
+    context.font = "24px Arial";
 
     drawGrid(canvas, context);
     populateGrid(context);
