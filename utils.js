@@ -41,4 +41,9 @@ Number.prototype.clamp = function(min, max) {
   return Math.min(Math.max(this, min), max);
 };
 
+// http://stackoverflow.com/questions/4467539/javascript-modulo-not-behaving
+Number.prototype.mod = function(n) {
+  return ((this%n)+n)%n;
+};
+
 module.exports = { getRandomIntInclusive, cartesianProductOf, identity, Number };

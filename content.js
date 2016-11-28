@@ -33,7 +33,6 @@ function positionFromId(id) {
   var margin = 15;
   if(typeof(gridAsArray[id]) === 'undefined') {
     console.log(`off canvas position for id: ${id}`);
-    return [-100,-100];
   }
   var [x, y] = gridAsArray[id];
   var position = [(x * size) + margin, (y * size) + margin];
@@ -67,19 +66,19 @@ function printTo(objFunc, ctxt) {
 }
 
 function applyToNorth(id, nFunc) {
-  var [c, d] = positionFromId(id + offsets['N']);
+  var [c, d] = positionFromId((id + offsets['N']).mod(99));
   nFunc.apply(null, [c, d]);
 }
 function applyToSouth(id, sFunc) {
-  var [a, b] = positionFromId(id + offsets['S']);
+  var [a, b] = positionFromId((id + offsets['S']).mod(99));
   sFunc.apply(null, [a, b]);
 }
 function applyToEast(id, eFunc) {
-  var [e, f] = positionFromId(id + offsets['E']);
+  var [e, f] = positionFromId((id + offsets['E']).mod(99));
   eFunc.apply(null, [e, f]);
 }
 function applyToWest(id, wFunc) {
-  var [g, h] = positionFromId(id + offsets['W']);
+  var [g, h] = positionFromId((id + offsets['W']).mod(99));
   wFunc.apply(null, [g, h]);
 }
 
