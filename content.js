@@ -128,19 +128,15 @@ function populateGrid(context) {
 
 function lifeStep(grid) {
   function calculateCell(cell,i) {
-    function isLive(a) {
-      if(typeof(a) === 'undefined') {
-        return false;
-      } else {
-        return a.length > 0;
-      }
+    function isLive(grid, a) {
+      return grid[a.mod(99)].length > 0;
     }
 
-    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid[e]); });
+    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid,e); });
     var numberOfLiveNeighbors = neighborhood.filter(utils.identity).length.clamp(0, 4);
 
     var nextState;
-    if(isLive(cell)) {
+    if(isLive(grid,i)) {
       // rules from http://disruptive-communications.com/conwaylifejavascript/
       var nextLivingState = ['dead', 'dead', 'live', 'live', 'dead'];
       //If a live cell has less than two live neighbours, it dies
