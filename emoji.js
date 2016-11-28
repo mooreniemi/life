@@ -1,3 +1,5 @@
+// grabbed from
+// http://www.fileformat.info/info/unicode/char/2618/index.htm
 var emoji = {
   grimace: "\uD83D\uDE2C",
   tiger: "\uD83D\uDC2F",

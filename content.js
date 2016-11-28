@@ -41,7 +41,7 @@ function positionFromId(id) {
 }
 
 function lucky() {
-  var luckyNumber = 10;
+  var luckyNumber = 100;
   var chance = utils.getRandomIntInclusive(1, luckyNumber);
   if (chance === luckyNumber) {
     return emoji["fourLeaf"];
@@ -93,31 +93,33 @@ function getNeighbors(id) {
 
 var currentGridState = Array.from(new Array(100), () => []);
 
+function gPrint(context, activeId) {
+  var [x,y] = positionFromId(activeId);
+  switch(currentGridState[activeId].length) {
+  case 0:
+    context.fillStyle = "#5FB661";
+    context.fillRect(x-4, y-4, 40, 40);
+    break;
+  case 1:
+    context.font = "24px Arial";
+    context.fillText(emoji['shamrock'], x+3, y+24);
+    break;
+  default:
+    context.fillStyle = "rgba(137,96,62,0.6)";
+    context.fillRect(x-4, y-4, 40, 40);
+    context.fillStyle = "rgba(255, 255, 255, 1.0)";
+
+    context.font = "24px Arial";
+    printToCardinals(activeId, context);
+    break;
+  }
+}
+
 function populateGrid(context) {
   var turns = 100;
   for(var i=1; i <= turns; i += 1) {
     var activeId = utils.getRandomIntInclusive(0, 99);
-    var [x,y] = positionFromId(activeId);
-
-    switch(currentGridState[activeId].length) {
-    case 0:
-      context.fillStyle = "#5FB661";
-      context.fillRect(x-4, y-4, 40, 40);
-      break;
-    case 1:
-      context.font = "24px Arial";
-      context.fillText(emoji['shamrock'], x+3, y+24);
-      break;
-    default:
-      context.fillStyle = "rgba(137,96,62,0.6)";
-      context.fillRect(x-4, y-4, 40, 40);
-      context.fillStyle = "rgba(255, 255, 255, 1.0)";
-
-      context.font = "24px Arial";
-      printToCardinals(activeId, context);
-      break;
-    }
-
+    gPrint(context, activeId);
     currentGridState[activeId].push(positionFromId(activeId));
   }
 }
@@ -132,21 +134,20 @@ function lifeStep(grid) {
       }
     }
 
-    var alive = isLive(cell);
     var neighbors = getNeighbors(i);
     var neighborhoodLiveness = neighbors.map(function(e) { return isLive(grid[e]); });
-    var livenessCount = neighborhoodLiveness.filter(function(e) { return e; }).length;
-    if(livenessCount > 3) { livenessCount = 4; };
+    var livenessCount = neighborhoodLiveness.filter(utils.identity).length.clamp(0, 4);
 
     var nextState;
-    if(alive) {
-      var nextLivingState = ['dead','dead','live','live','dead'];
+    if(isLive(cell)) {
+      // rules from http://disruptive-communications.com/conwaylifejavascript/
+      var nextLivingState = ['dead', 'dead', 'live', 'live', 'dead'];
       //If a live cell has less than two live neighbours, it dies
       //If a live cell has more than three live neighbours, it dies
       //If a live cell has two or three live neighbours, it continues living
       nextState = nextLivingState[livenessCount];
     } else {
-      var nextDeadState = ['dead','dead','dead','live','dead'];
+      var nextDeadState = ['dead', 'dead', 'dead', 'live', 'dead'];
       //If a dead cell has exactly three live neighbours, it comes to life
       nextState = nextDeadState[livenessCount];
     }
@@ -187,7 +188,6 @@ module.exports = (function() {
         // grey out previous state
         context.fillStyle = "rgba(137,96,62,0.9)";
         context.fillRect(x-4, y-4, 40, 40);
-        context.fillStyle = "rgba(255, 255, 255, 1.0)";
 
         switch(e.length) {
         case 0:
