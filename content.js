@@ -31,7 +31,7 @@ var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
 
 function positionFromId(id) {
   var margin = 15;
-  if(typeof(gridAsArray[id]) === 'undefined') {
+  if (typeof(gridAsArray[id]) === 'undefined') {
     console.log(`ya fucked up: off canvas position for id: ${id}`);
   }
   var [x, y] = gridAsArray[id];
@@ -48,7 +48,13 @@ function lucky() {
     return emoji["shamrock"];
   }
 }
-var offsets = { N: -1, S: 1, E: 10, W: -10 };
+var offsets = {
+  N: -1,
+  S: 1,
+  E: 10,
+  W: -10
+};
+
 function printToCardinals(id, ctxt) {
   applyToNorth(id, printTo(lucky, ctxt));
   applyToSouth(id, printTo(lucky, ctxt));
@@ -69,14 +75,17 @@ function applyToNorth(id, nFunc) {
   var [c, d] = positionFromId((id + offsets['N']).mod(99));
   nFunc.apply(null, [c, d]);
 }
+
 function applyToSouth(id, sFunc) {
   var [a, b] = positionFromId((id + offsets['S']).mod(99));
   sFunc.apply(null, [a, b]);
 }
+
 function applyToEast(id, eFunc) {
   var [e, f] = positionFromId((id + offsets['E']).mod(99));
   eFunc.apply(null, [e, f]);
 }
+
 function applyToWest(id, wFunc) {
   var [g, h] = positionFromId((id + offsets['W']).mod(99));
   wFunc.apply(null, [g, h]);
@@ -97,19 +106,19 @@ function getNeighbors(id) {
 var currentGridState = Array.from(new Array(100), () => []);
 
 function gPrint(context, e, i) {
-  var [x,y] = positionFromId(i);
-  switch(e.length) {
+  var [x, y] = positionFromId(i);
+  switch (e.length) {
   case 0:
     context.fillStyle = "rgba(137,96,62,0.9)";
-    context.fillRect(x-4, y-4, 38, 38);
+    context.fillRect(x - 4, y - 4, 38, 38);
     context.fillStyle = "rgba(255, 255, 255, 1.0)";
     break;
   case 1:
-    context.fillText(emoji['tiger'], x+3, y+24);
+    context.fillText(emoji['tiger'], x + 3, y + 24);
     break;
   default:
     context.fillStyle = "#5FB661";
-    context.fillRect(x-4, y-4, 40, 40);
+    context.fillRect(x - 4, y - 4, 40, 40);
 
     printToCardinals(i, context);
     break;
@@ -117,7 +126,7 @@ function gPrint(context, e, i) {
 }
 
 function populateGrid(context) {
-  for(var i=1; i <= 100; i += 1) {
+  for (var i = 1; i <= 100; i += 1) {
     var activeId = utils.getRandomIntInclusive(0, 99);
     gPrint(context, currentGridState[activeId], activeId);
     currentGridState[activeId].push(positionFromId(activeId));
@@ -125,16 +134,18 @@ function populateGrid(context) {
 }
 
 function lifeStep(grid) {
-  function calculateCell(cell,i) {
+  function calculateCell(cell, i) {
     function isLive(grid, a) {
       return grid[a.mod(99)].length > 0;
     }
 
-    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid, e); });
+    var neighborhood = getNeighbors(i).map(function(e) {
+      return isLive(grid, e);
+    });
     var numberOfLiveNeighbors = neighborhood.filter(utils.identity).length.clamp(0, 4);
 
     var nextState;
-    if(isLive(grid,i)) {
+    if (isLive(grid, i)) {
       // rules from http://disruptive-communications.com/conwaylifejavascript/
       var nextLivingState = ['dead', 'dead', 'live', 'live', 'dead'];
       //If a live cell has less than two live neighbours, it dies
@@ -147,7 +158,7 @@ function lifeStep(grid) {
       nextState = nextDeadState[numberOfLiveNeighbors];
     }
 
-    if(nextState === 'live') {
+    if (nextState === 'live') {
       cell.push(positionFromId(i));
     } else {
       cell.length = 0;
@@ -173,7 +184,9 @@ module.exports = (function() {
       drawGrid(canvas, context); // clear
 
       function gPrintWithContext(context) {
-        return function(e,i) { gPrint(context, e, i); };
+        return function(e, i) {
+          gPrint(context, e, i);
+        };
       }
       currentGridState.forEach(gPrintWithContext(context));
     }, false);
