@@ -1,5 +1,6 @@
 var emoji = require("./emoji.js");
 var utils = require("./utils.js");
+var compass = require("./compass.js");
 
 /* @flow */
 
@@ -28,6 +29,7 @@ function drawGrid(canvas, context) {
 
 var zeroToNine = [...Array(10).keys()];
 var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
+var currentGridState = Array.from(new Array(100), () => []);
 
 function positionFromId(id) {
   var margin = 15;
@@ -48,18 +50,12 @@ function lucky() {
     return emoji["shamrock"];
   }
 }
-var offsets = {
-  N: -1,
-  S: 1,
-  E: 10,
-  W: -10
-};
 
 function printToCardinals(id, ctxt) {
-  applyToNorth(id, printTo(lucky, ctxt));
-  applyToSouth(id, printTo(lucky, ctxt));
-  applyToEast(id, printTo(lucky, ctxt));
-  applyToWest(id, printTo(lucky, ctxt));
+  compass.applyToNorth(id, printTo(lucky, ctxt));
+  compass.applyToSouth(id, printTo(lucky, ctxt));
+  compass.applyToEast(id, printTo(lucky, ctxt));
+  compass.applyToWest(id, printTo(lucky, ctxt));
 }
 
 function printTo(objFunc, ctxt) {
@@ -70,40 +66,6 @@ function printTo(objFunc, ctxt) {
   }
   return f;
 }
-
-function applyToNorth(id, nFunc) {
-  var [c, d] = positionFromId((id + offsets['N']).mod(99));
-  nFunc.apply(null, [c, d]);
-}
-
-function applyToSouth(id, sFunc) {
-  var [a, b] = positionFromId((id + offsets['S']).mod(99));
-  sFunc.apply(null, [a, b]);
-}
-
-function applyToEast(id, eFunc) {
-  var [e, f] = positionFromId((id + offsets['E']).mod(99));
-  eFunc.apply(null, [e, f]);
-}
-
-function applyToWest(id, wFunc) {
-  var [g, h] = positionFromId((id + offsets['W']).mod(99));
-  wFunc.apply(null, [g, h]);
-}
-
-function getNeighbors(id) {
-  var n = id - 1,
-      ne = n + 10,
-      nw = n - 10,
-      s = id + 1,
-      se = s + 10,
-      sw = s - 10,
-      e = id + 10,
-      w = id - 10;
-  return [n, ne, nw, s, se, sw, e, w];
-}
-
-var currentGridState = Array.from(new Array(100), () => []);
 
 function gPrint(context, e, i) {
   var [x, y] = positionFromId(i);
@@ -116,16 +78,22 @@ function gPrint(context, e, i) {
   case 0:
     context.fillStyle = "#89603e";
     context.fillRect(x - 4, y - 4, 38, 38);
+    context.fillStyle = "grey";
+    context.fillText(i, x + 3, y + 24);
     break;
-  case 1:
-    context.fillStyle = "#5FB661";
-    context.fillRect(x - 4, y - 4, 40, 40);
-    context.fillText(emoji['rain'], x + 3, y + 24);
-    break;
+    //case 1:
+    //context.fillStyle = "#5FB661";
+    //context.fillRect(x - 4, y - 4, 40, 40);
+    //context.fillText(emoji['rain'], x + 3, y + 24);
+    //context.fillStyle = "grey";
+    //context.fillText(i, x + 3, y + 24);
+    //break;
   default:
     context.fillStyle = "#5FB661";
     context.fillRect(x - 4, y - 4, 40, 40);
-    printToCardinals(i, context);
+    context.fillStyle = "black";
+    context.fillText(i, x + 3, y + 24);
+    //printToCardinals(i, context);
     break;
   }
 }
@@ -140,22 +108,24 @@ function populateGrid(context) {
 
 function seedGlider(context) {
   var centerId = utils.getRandomIntInclusive(0, 99);
-  var neighborhood = getNeighbors(centerId);
+  var neighborhood = compass.getNeighbors(centerId);
   // glider from centerId: N, E, SE, S, SW
   var gliderPositions = [0, 6, 4, 3, 5];
   gliderPositions.map(function(p) {
-    currentGridState[neighborhood[p]].push(positionFromId(neighborhood[p]));
+    currentGridState[neighborhood[p]] = [neighborhood[p]];
     gPrint(context, currentGridState[neighborhood[p]], neighborhood[p]);
   });
 }
 
-function lifeStep(grid) {
-  function calculateCell(cell, i) {
-    function isLive(grid, a) {
-      return grid[a.mod(99)].length > 0 ? 1 : 0;
-    }
+function isLive(grid, a) {
+  var sub = grid[a.mod(99)];
+  var l = sub.length;
+  return l > 0 ? 1 : 0;
+}
 
-    var neighborhood = getNeighbors(i).map(function(e) { return isLive(grid, e); });
+function calculateCellIn(grid) {
+  return function(cell, i) {
+    var neighborhood = compass.getNeighbors(i).map(function(e) { return isLive(grid, e); });
     var numberOfLiveNeighbors = neighborhood.filter(utils.identity).length.clamp(0, 4);
 
     // rules from http://disruptive-communications.com/conwaylifejavascript/
@@ -176,9 +146,12 @@ function lifeStep(grid) {
       cell.length = 0;
     }
     return cell;
-  }
+  };
+}
 
-  return grid.map(calculateCell);
+function lifeStep(grid) {
+  console.log(currentGridState)
+  return grid.map(calculateCellIn(grid));
 }
 
 module.exports = (function() {
@@ -216,7 +189,7 @@ module.exports = (function() {
 
     reseedButton.addEventListener('click', function() {
       clearInterval(interval); // just in case
-      drawGrid(canvas, context);
+      drawGrid(canvas, context); // clear
       currentGridState = Array.from(new Array(100), () => []);
       seedGlider(context);
     }, false);

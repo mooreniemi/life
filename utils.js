@@ -25,6 +25,10 @@ function identity(a) {
   return a;
 }
 
+function intAsBool(i) {
+  return i === 1;
+}
+
 /**
  * http://stackoverflow.com/questions/11409895/whats-the-most-elegant-way-to-cap-a-number-to-a-segment
  * Returns a number whose value is limited to the given range.
@@ -46,4 +50,4 @@ Number.prototype.mod = function(n) {
   return ((this%n)+n)%n;
 };
 
-module.exports = { getRandomIntInclusive, cartesianProductOf, identity, Number };
+module.exports = { getRandomIntInclusive, cartesianProductOf, identity, intAsBool, Number };
