@@ -138,6 +138,17 @@ function populateGrid(context) {
   }
 }
 
+function seedGlider(context) {
+  var centerId = utils.getRandomIntInclusive(0, 99);
+  var neighborhood = getNeighbors(centerId);
+  // glider from centerId: N, E, SE, S, SW
+  var gliderPositions = [0, 6, 4, 3, 5];
+  gliderPositions.map(function(p) {
+    currentGridState[neighborhood[p]].push(positionFromId(neighborhood[p]));
+    gPrint(context, currentGridState[neighborhood[p]], neighborhood[p]);
+  });
+}
+
 function lifeStep(grid) {
   function calculateCell(cell, i) {
     function isLive(grid, a) {
@@ -174,6 +185,7 @@ module.exports = (function() {
   document.addEventListener("DOMContentLoaded", function(event) {
     var runButton = document.getElementById("run");
     var stopButton = document.getElementById("stop");
+    var reseedButton = document.getElementById("reseed");
 
     var canvas = document.querySelector("canvas");
     var context = canvas.getContext("2d");
@@ -200,6 +212,13 @@ module.exports = (function() {
 
     stopButton.addEventListener('click', function() {
       clearInterval(interval);
+    }, false);
+
+    reseedButton.addEventListener('click', function() {
+      clearInterval(interval); // just in case
+      drawGrid(canvas, context);
+      currentGridState = Array.from(new Array(100), () => []);
+      seedGlider(context);
     }, false);
   });
 })();
