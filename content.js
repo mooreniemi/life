@@ -93,11 +93,11 @@ function applyToWest(id, wFunc) {
 
 function getNeighbors(id) {
   var n = id - 1,
-      ne = id - 1 + 10,
-      nw = id - 1 - 10,
+      ne = n + 10,
+      nw = n - 10,
       s = id + 1,
-      se = id + 1 + 10,
-      sw = id + 1 - 10,
+      se = s + 10,
+      sw = s - 10,
       e = id + 10,
       w = id - 10;
   return [n, ne, nw, s, se, sw, e, w];
@@ -172,6 +172,9 @@ function lifeStep(grid) {
 
 module.exports = (function() {
   document.addEventListener("DOMContentLoaded", function(event) {
+    var runButton = document.getElementById("run");
+    var stopButton = document.getElementById("stop");
+
     var canvas = document.querySelector("canvas");
     var context = canvas.getContext("2d");
     context.font = "24px Arial";
@@ -179,17 +182,24 @@ module.exports = (function() {
     drawGrid(canvas, context);
     populateGrid(context);
 
-    canvas.addEventListener('click', function() {
-      var newGridState = lifeStep(currentGridState);
-      currentGridState = newGridState;
-      drawGrid(canvas, context); // clear
+    var interval = null;
+    runButton.addEventListener('click', function() {
+      interval = setInterval(function() {
+        var newGridState = lifeStep(currentGridState);
+        currentGridState = newGridState;
+        drawGrid(canvas, context); // clear
 
-      function gPrintWithContext(context) {
-        return function(e, i) {
-          gPrint(context, e, i);
-        };
-      }
-      currentGridState.forEach(gPrintWithContext(context));
+        function gPrintWithContext(context) {
+          return function(e, i) {
+            gPrint(context, e, i);
+          };
+        }
+        currentGridState.forEach(gPrintWithContext(context));
+      }, 500);
+    }, false);
+
+    stopButton.addEventListener('click', function() {
+      clearInterval(interval);
     }, false);
   });
 })();

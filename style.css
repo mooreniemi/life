@@ -1,4 +1,13 @@
-canvas {
+.center {
   display: block;
   margin: 0 auto;
+}
+
+.margin-top {
+  margin-top: 10px;
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
 }
