@@ -19,7 +19,6 @@ function lucky() {
   var chance = utils.getRandomIntInclusive(1, luckyNumber);
   if (chance === luckyNumber) {
     return asUni["fourLeaf"];
-    console.log("how lucky!")
   } else {
     return asUni["shamrock"];
   }
