@@ -1,3 +1,5 @@
+var utils = require("./utils.js");
+
 var offsets = {
   N: -1,
   S: 1,
@@ -14,9 +16,24 @@ function getNeighbors(id) {
       sw = s + offsets['W'],
       e = id + offsets['E'],
       w = id + offsets['W'];
-  return [n, ne, nw, s, se, sw, e, w];
+  return [n, ne, nw, s, se, sw, e, w].map(function(n) { return n.mod(99); });
 }
 
+var zeroToNine = [...Array(10).keys()];
+var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
+var size = 40;
+
+function positionFromId(id) {
+  var margin = 15;
+  if (typeof(gridAsArray[id]) === 'undefined') {
+    console.log(`ya fucked up: off canvas position for id: ${id}`);
+  }
+  var [x, y] = gridAsArray[id];
+  var position = [(x * size) + margin, (y * size) + margin];
+  return position;
+}
+
+//compass.applyToSouthEast(i, printTo(function(){ return emoji['rain']; }, context));
 function applyToNorth(id, nFunc) {
   var [c, d] = positionFromId((id + offsets['N']).mod(99));
   nFunc.apply(null, [c, d]);
@@ -58,7 +75,7 @@ function applyToWest(id, wFunc) {
 }
 
 module.exports = {
-  offsets, getNeighbors,
+  offsets, getNeighbors, positionFromId,
   applyToNorth, applyToNorthEast, applyToNorthWest,
   applyToSouth, applyToSouthEast, applyToSouthWest,
   applyToEast, applyToWest

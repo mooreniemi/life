@@ -27,19 +27,7 @@ function drawGrid(canvas, context) {
   context.stroke();
 }
 
-var zeroToNine = [...Array(10).keys()];
-var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
 var currentGridState = Array.from(new Array(100), () => []);
-
-function positionFromId(id) {
-  var margin = 15;
-  if (typeof(gridAsArray[id]) === 'undefined') {
-    console.log(`ya fucked up: off canvas position for id: ${id}`);
-  }
-  var [x, y] = gridAsArray[id];
-  var position = [(x * size) + margin, (y * size) + margin];
-  return position;
-}
 
 function lucky() {
   var luckyNumber = 100;
@@ -49,13 +37,6 @@ function lucky() {
   } else {
     return emoji["shamrock"];
   }
-}
-
-function printToCardinals(id, ctxt) {
-  compass.applyToNorth(id, printTo(lucky, ctxt));
-  compass.applyToSouth(id, printTo(lucky, ctxt));
-  compass.applyToEast(id, printTo(lucky, ctxt));
-  compass.applyToWest(id, printTo(lucky, ctxt));
 }
 
 function printTo(objFunc, ctxt) {
@@ -68,32 +49,26 @@ function printTo(objFunc, ctxt) {
 }
 
 function gPrint(context, e, i) {
-  var [x, y] = positionFromId(i);
+  var [x, y] = compass.positionFromId(i);
 
   // grey out previous
   context.fillStyle = "rgba(137,96,62,0.9)";
   context.fillRect(x - 4, y - 4, 38, 38);
+  // for debugging
+  function printNums() {
+    context.fillStyle = "grey";
+    context.fillText(i, x + 3, y + 24);
+  }
 
   switch (e.length) {
   case 0:
     context.fillStyle = "#89603e";
     context.fillRect(x - 4, y - 4, 38, 38);
-    context.fillStyle = "grey";
-    context.fillText(i, x + 3, y + 24);
     break;
-    //case 1:
-    //context.fillStyle = "#5FB661";
-    //context.fillRect(x - 4, y - 4, 40, 40);
-    //context.fillText(emoji['rain'], x + 3, y + 24);
-    //context.fillStyle = "grey";
-    //context.fillText(i, x + 3, y + 24);
-    //break;
   default:
     context.fillStyle = "#5FB661";
     context.fillRect(x - 4, y - 4, 40, 40);
-    context.fillStyle = "black";
-    context.fillText(i, x + 3, y + 24);
-    //printToCardinals(i, context);
+    context.fillText(emoji['rain'], x + 3, y + 24);
     break;
   }
 }
@@ -101,18 +76,20 @@ function gPrint(context, e, i) {
 function populateGrid(context) {
   for (var i = 1; i <= 100; i += 1) {
     var activeId = utils.getRandomIntInclusive(0, 99);
+    currentGridState[activeId].push(compass.positionFromId(activeId));
     gPrint(context, currentGridState[activeId], activeId);
-    currentGridState[activeId].push(positionFromId(activeId));
   }
 }
 
+var centerId = null;
 function seedGlider(context) {
+  currentGridState = Array.from(new Array(100), () => []);
   var centerId = utils.getRandomIntInclusive(0, 99);
   var neighborhood = compass.getNeighbors(centerId);
   // glider from centerId: N, E, SE, S, SW
   var gliderPositions = [0, 6, 4, 3, 5];
   gliderPositions.map(function(p) {
-    currentGridState[neighborhood[p]] = [neighborhood[p]];
+    currentGridState[neighborhood[p]] = [compass.positionFromId(neighborhood[p])];
     gPrint(context, currentGridState[neighborhood[p]], neighborhood[p]);
   });
 }
@@ -123,35 +100,29 @@ function isLive(grid, a) {
   return l > 0 ? 1 : 0;
 }
 
-function calculateCellIn(grid) {
-  return function(cell, i) {
-    var neighborhood = compass.getNeighbors(i).map(function(e) { return isLive(grid, e); });
-    var numberOfLiveNeighbors = neighborhood.filter(utils.identity).length.clamp(0, 4);
+function calculateCellIn(grid, cell, i) {
+  var neighborhood = compass.getNeighbors(i);
+  var liveNeighbors = neighborhood.map(function(e) { return isLive(grid, e); });
+  var numberOfLiveNeighbors = liveNeighbors.filter(utils.intAsBool).length.clamp(0, 4);
 
-    // rules from http://disruptive-communications.com/conwaylifejavascript/
-    //If a live cell has less than two live neighbours, it dies
-    //If a live cell has more than three live neighbours, it dies
-    //If a live cell has two or three live neighbours, it continues living
-    var nextLivingState = ['dead', 'dead', 'live', 'live', 'dead'];
+  // rules from http://disruptive-communications.com/conwaylifejavascript/
+  //If a live cell has less than two live neighbours, it dies
+  //If a live cell has more than three live neighbours, it dies
+  //If a live cell has two or three live neighbours, it continues living
+  var nextLivingState = ['dead', 'dead', 'live', 'live', 'dead'];
 
-    //If a dead cell has exactly three live neighbours, it comes to life
-    var nextDeadState = ['dead', 'dead', 'dead', 'live', 'dead'];
+  //If a dead cell has exactly three live neighbours, it comes to life
+  var nextDeadState = ['dead', 'dead', 'dead', 'live', 'dead'];
 
-    var nextPossibleState = [nextDeadState, nextLivingState];
+  var nextPossibleState = [nextDeadState, nextLivingState];
 
-    var nextState = nextPossibleState[isLive(grid, i)][numberOfLiveNeighbors];
-    if (nextState === 'live') {
-      cell.push(positionFromId(i));
-    } else {
-      cell.length = 0;
-    }
-    return cell;
-  };
-}
-
-function lifeStep(grid) {
-  console.log(currentGridState)
-  return grid.map(calculateCellIn(grid));
+  var nextState = nextPossibleState[isLive(grid, i)][numberOfLiveNeighbors];
+  if (nextState === 'live') {
+    cell.push(compass.positionFromId(i));
+  } else {
+    cell.length = 0;
+  }
+  return cell;
 }
 
 module.exports = (function() {
@@ -159,6 +130,7 @@ module.exports = (function() {
     var runButton = document.getElementById("run");
     var stopButton = document.getElementById("stop");
     var reseedButton = document.getElementById("reseed");
+    var gliderButton = document.getElementById("glider");
 
     var canvas = document.querySelector("canvas");
     var context = canvas.getContext("2d");
@@ -167,18 +139,22 @@ module.exports = (function() {
     drawGrid(canvas, context);
     populateGrid(context);
 
+    function gPrintWithContext(context) {
+      return function(e, i) {
+        gPrint(context, e, i);
+      };
+    }
+
     var interval = null;
     runButton.addEventListener('click', function() {
       interval = setInterval(function() {
-        var newGridState = lifeStep(currentGridState);
+        var lastGridState = Object.freeze(currentGridState.slice());
+        var newGridState = Array.from(new Array(100), () => []);
+        newGridState.map(function(e,i) {
+          return newGridState[i] = calculateCellIn(lastGridState,e,i);
+        });
         currentGridState = newGridState;
         drawGrid(canvas, context); // clear
-
-        function gPrintWithContext(context) {
-          return function(e, i) {
-            gPrint(context, e, i);
-          };
-        }
         currentGridState.forEach(gPrintWithContext(context));
       }, 500);
     }, false);
@@ -187,11 +163,16 @@ module.exports = (function() {
       clearInterval(interval);
     }, false);
 
+    gliderButton.addEventListener('click', function() {
+      clearInterval(interval); // just in case
+      drawGrid(canvas, context); // clear
+      seedGlider(context);
+    }, false);
+
     reseedButton.addEventListener('click', function() {
       clearInterval(interval); // just in case
       drawGrid(canvas, context); // clear
-      currentGridState = Array.from(new Array(100), () => []);
-      seedGlider(context);
+      populateGrid(context);
     }, false);
   });
 })();
