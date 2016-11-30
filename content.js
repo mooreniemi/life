@@ -69,7 +69,7 @@ function gPrint(context, e, i) {
 }
 
 function populateGrid(context) {
-  for (var i = 1; i <= 100; i += 1) {
+  for (var i = 1; i <= 50; i += 1) {
     var activeId = utils.getRandomIntInclusive(0, 99);
     currentGridState[activeId].push(compass.positionFromId(activeId));
     gPrint(context, currentGridState[activeId], activeId);
@@ -89,12 +89,19 @@ function seedGlider(context) {
 }
 
 function isLive(grid, a) {
-  var sub = grid[a.mod(99)];
-  var l = sub.length;
-  return l > 0 ? 1 : 0;
+  var e = grid[a.mod(99)];
+  return e.length > 0 ? 1 : 0;
 }
 
 function calculateCellIn(grid, cell, i) {
+  function live(cell,i) {
+    cell.push(compass.positionFromId(i));
+  }
+
+  function dead(cell) {
+    cell.length = 0;
+  }
+
   var neighborhood = compass.getNeighbors(i);
   var liveNeighbors = neighborhood.map(function(e) { return isLive(grid, e); });
   var numberOfLiveNeighbors = liveNeighbors.filter(utils.intAsBool).length.clamp(0, 4);
@@ -103,19 +110,15 @@ function calculateCellIn(grid, cell, i) {
   //If a live cell has less than two live neighbours, it dies
   //If a live cell has more than three live neighbours, it dies
   //If a live cell has two or three live neighbours, it continues living
-  var nextLivingState = ['dead', 'dead', 'live', 'live', 'dead'];
+  var nextLivingState = [dead, dead, live, live, dead];
 
   //If a dead cell has exactly three live neighbours, it comes to life
-  var nextDeadState = ['dead', 'dead', 'dead', 'live', 'dead'];
+  var nextDeadState = [dead, dead, dead, live, dead];
 
   var nextPossibleState = [nextDeadState, nextLivingState];
 
-  var nextState = nextPossibleState[isLive(grid, i)][numberOfLiveNeighbors];
-  if (nextState === 'live') {
-    cell.push(compass.positionFromId(i));
-  } else {
-    cell.length = 0;
-  }
+  nextPossibleState[isLive(grid, i)][numberOfLiveNeighbors].call(null, cell, i);
+
   return cell;
 }
 
