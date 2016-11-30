@@ -1,5 +1,9 @@
 # life
-kinda sorta conway's game of life
+
+conway's game of life in javascript
+
+![gol executing](gol.gif)
+
 
 ```
 npm install webpack -g
