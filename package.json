@@ -1,0 +1,24 @@
+{
+  "name": "life",
+  "version": "1.0.0",
+  "description": "kinda sorta conway's game of life",
+  "main": "bundle.js",
+  "dependencies": {
+    "css-loader": "^0.26.0",
+    "style-loader": "^0.13.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mooreniemi/life.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mooreniemi/life/issues"
+  },
+  "homepage": "https://github.com/mooreniemi/life#readme"
+}
