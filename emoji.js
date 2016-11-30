@@ -1,6 +1,8 @@
+var utils = require("./utils.js");
+
 // grabbed from
 // http://www.fileformat.info/info/unicode/char/2618/index.htm
-var emoji = {
+var asUni = {
   grimace: "\uD83D\uDE2C",
   tiger: "\uD83D\uDC2F",
   newMoon: "\uD83C\uDF1A",
@@ -12,4 +14,16 @@ var emoji = {
   rain: "\u26C8",
 };
 
-module.exports = emoji;
+function lucky() {
+  var luckyNumber = 10;
+  var chance = utils.getRandomIntInclusive(1, luckyNumber);
+  if (chance === luckyNumber) {
+    return asUni["fourLeaf"];
+    console.log("how lucky!")
+  } else {
+    return asUni["shamrock"];
+  }
+};
+
+
+module.exports = {asUni, lucky};

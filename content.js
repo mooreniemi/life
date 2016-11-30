@@ -4,45 +4,37 @@ var compass = require("./compass.js");
 
 /* @flow */
 
-var size = 40;
-var bw = 400;
-var bh = bw;
+function drawGridLines(context) {
+  context.strokeStyle = "#5FB661";
+  context.stroke();
+}
 
 function drawGrid(canvas, context) {
+  var bw = 400;
+  var bh = bw;
   var p = 10;
 
-  for (var x = 0; x <= bw; x += size) {
+  for (var x = 0; x <= bw; x += 40) {
     context.moveTo(0.5 + x + p, p);
     context.lineTo(0.5 + x + p, bh + p);
   }
 
-  for (var y = 0; y <= bh; y += size) {
+  for (var y = 0; y <= bh; y += 40) {
     context.moveTo(p, 0.5 + y + p);
     context.lineTo(bw + p, 0.5 + y + p);
   }
 
   context.fillStyle = "#89603e";
   context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeStyle = "#5FB661";
-  context.stroke();
+  drawGridLines(context);
 }
 
 var currentGridState = Array.from(new Array(100), () => []);
-
-function lucky() {
-  var luckyNumber = 100;
-  var chance = utils.getRandomIntInclusive(1, luckyNumber);
-  if (chance === luckyNumber) {
-    return emoji["fourLeaf"];
-  } else {
-    return emoji["shamrock"];
-  }
-}
+var xOffset = 10;
+var yOffset = 28;
 
 function printTo(objFunc, ctxt) {
   function f(x, y) {
-    var xOffset = 3;
-    var yOffset = 24;
     ctxt.fillText(objFunc.call(), x + xOffset, y + yOffset);
   }
   return f;
@@ -50,25 +42,28 @@ function printTo(objFunc, ctxt) {
 
 function gPrint(context, e, i) {
   var [x, y] = compass.positionFromId(i);
+  var squareSize = 39;
 
-  // grey out previous
-  context.fillStyle = "rgba(137,96,62,0.9)";
-  context.fillRect(x - 4, y - 4, 38, 38);
   // for debugging
   function printNums() {
     context.fillStyle = "grey";
-    context.fillText(i, x + 3, y + 24);
+    context.fillText(i, x + xOffset, y + yOffset);
   }
+
+  // grey out previous
+  context.fillStyle = "rgba(137,96,62,0.9)";
+  context.fillRect(x, y, squareSize, squareSize);
 
   switch (e.length) {
   case 0:
     context.fillStyle = "#89603e";
-    context.fillRect(x - 4, y - 4, 38, 38);
+    context.fillRect(x, y, squareSize, squareSize);
+    drawGridLines(context);
     break;
   default:
     context.fillStyle = "#5FB661";
-    context.fillRect(x - 4, y - 4, 40, 40);
-    context.fillText(emoji['rain'], x + 3, y + 24);
+    context.fillRect(x, y, squareSize, squareSize);
+    context.fillText(emoji.lucky(), x + xOffset, y + yOffset);
     break;
   }
 }
@@ -81,7 +76,6 @@ function populateGrid(context) {
   }
 }
 
-var centerId = null;
 function seedGlider(context) {
   currentGridState = Array.from(new Array(100), () => []);
   var centerId = utils.getRandomIntInclusive(0, 99);

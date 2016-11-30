@@ -22,9 +22,9 @@ function getNeighbors(id) {
 var zeroToNine = [...Array(10).keys()];
 var gridAsArray = utils.cartesianProductOf(zeroToNine, zeroToNine);
 var size = 40;
+var margin = 10;
 
 function positionFromId(id) {
-  var margin = 15;
   if (typeof(gridAsArray[id]) === 'undefined') {
     console.log(`ya fucked up: off canvas position for id: ${id}`);
   }
@@ -33,7 +33,7 @@ function positionFromId(id) {
   return position;
 }
 
-//compass.applyToSouthEast(i, printTo(function(){ return emoji['rain']; }, context));
+//compass.applyToSouthEast(i, printTo(function(){ return emoji.asUni['rain']; }, context));
 function applyToNorth(id, nFunc) {
   var [c, d] = positionFromId((id + offsets['N']).mod(99));
   nFunc.apply(null, [c, d]);
